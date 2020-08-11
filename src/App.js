@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -9,11 +8,12 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+
 import api from "./services/api";
 
 export default function App() {
 
-  const [repositories, setRespositories] = useState([]) ;
+  const [repositories, setRespositories] = useState([]);
 
   useEffect(()=>{
     api.get('repositories').then(response=>{
@@ -22,7 +22,18 @@ export default function App() {
   }, []);
 
   async function handleLikeRepository(id) {
+    const response = await api.post(`repositories/${id}/like`);
+    const likedRepository = response.data;
     
+    const repositoriesUpdated = repositories.map(repository => {
+      if(repository.id===id){
+        return likedRepository;
+      }else{
+        return repository;
+      }
+    });
+    setRespositories(repositoriesUpdated);
+
   }
 
   return (
@@ -37,7 +48,7 @@ export default function App() {
                 <Text style={styles.repository}>{repository.title}</Text>
 
                 <View style={styles.techsContainer}>
-                    {repository.tech.map(tech=> (
+                    {repository.techs.map(tech=> (
                       <Text key={tech} style={styles.tech}>
                         {tech}
                       </Text>
